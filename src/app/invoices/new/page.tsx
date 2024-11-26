@@ -55,7 +55,7 @@ export default function NewInvoice() {
               htmlFor="description"
               className="block mb-2 font-semibold text-sm"
             >
-              Billing Name
+              Billing Details
             </Label>
             <Textarea id="description" name="description" />
           </div>

@@ -1,6 +1,6 @@
 {
-  "id": "f38f1dd3-ebd7-4445-8520-a995ba7587a9",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "a9ae4b50-1821-4d67-a240-48961c4a7238",
+  "prevId": "f38f1dd3-ebd7-4445-8520-a995ba7587a9",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -38,6 +38,12 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "organisationId": {
+          "name": "organisationId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -89,6 +95,12 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "organisationId": {
+          "name": "organisationId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "customerId": {
           "name": "customerId",

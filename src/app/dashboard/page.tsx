@@ -13,12 +13,39 @@ import { Button } from "@/components/ui/button";
 import { CirclePlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { db } from "@/db";
-import { Invoices } from "@/db/schema";
+import { Invoices, Customers } from "@/db/schema";
 import Container from "@/components/Container";
+import { auth } from "@clerk/nextjs/server";
+import { eq, isNull, and } from "drizzle-orm";
 
 export default async function Dashboard() {
-  const invoices = await db.select().from(Invoices);
-  console.log(invoices);
+  const { userId, orgId } = await auth();
+
+  if (!userId) {
+    return;
+  }
+
+  let results;
+  if (orgId) {
+    results = await db
+      .select()
+      .from(Invoices)
+      .innerJoin(Customers, eq(Invoices.customerId, Customers.id))
+      .where(eq(Invoices.organisationId, orgId));
+  } else {
+    results = await db
+      .select()
+      .from(Invoices)
+      .innerJoin(Customers, eq(Invoices.customerId, Customers.id))
+      .where(and(eq(Invoices.userId, userId), isNull(Invoices.organisationId)));
+  }
+
+  const invoices = results?.map(({ invoices, customers }) => {
+    return {
+      ...invoices,
+      customer: customers,
+    };
+  });
   return (
     <main className="h-full">
       <Container>
@@ -61,7 +88,7 @@ export default async function Dashboard() {
                       href={`/invoices/${invoice.id}`}
                       className="font-semibold p-4 block"
                     >
-                      Abhinav
+                      {invoice.customer.name}
                     </Link>
                   </TableCell>
                   <TableCell className="text-left p-0">
@@ -69,7 +96,7 @@ export default async function Dashboard() {
                       href={`/invoices/${invoice.id}`}
                       className="p-4 block"
                     >
-                      k@credit.com
+                      {invoice.customer.email}
                     </Link>
                   </TableCell>
                   <TableCell className="text-cent p-0er ">

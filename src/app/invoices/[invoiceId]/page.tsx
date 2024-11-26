@@ -1,77 +1,65 @@
 import { db } from "@/db";
-import { Invoices } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { Customers, Invoices } from "@/db/schema";
+import { eq, isNull } from "drizzle-orm";
+
 import { notFound } from "next/navigation";
-import Container from "@/components/Container";
+
+import { auth } from "@clerk/nextjs/server";
+import { and } from "drizzle-orm";
+
+import Invoice from "./Invoice";
 
 export default async function InvoicePage({
   params,
 }: {
-  params: { invoiceId: string };
+  params: Promise<{ invoiceId: string }>;
 }) {
-  const invoiceId = parseInt(params.invoiceId);
+  // Await the params object
+  const { invoiceId: invoiceIdStr } = await params;
+
+  const { userId, orgId } = await auth();
+  if (!userId) {
+    return;
+  }
+
+  const invoiceId = parseInt(invoiceIdStr);
   if (isNaN(invoiceId)) {
     throw new Error("Invalid ID");
   }
-  const [result] = await db
-    .select()
-    .from(Invoices)
-    .where(eq(Invoices.id, invoiceId))
-    .limit(1);
+
+  let result;
+  if (orgId) {
+    [result] = await db
+      .select()
+      .from(Invoices)
+      .innerJoin(Customers, eq(Invoices.customerId, Customers.id))
+      .where(
+        and(eq(Invoices.id, invoiceId), eq(Invoices.organisationId, orgId))
+      )
+      .limit(1);
+  } else {
+    [result] = await db
+      .select()
+      .from(Invoices)
+      .innerJoin(Customers, eq(Invoices.customerId, Customers.id))
+      .where(
+        and(
+          eq(Invoices.id, invoiceId),
+          eq(Invoices.userId, userId),
+          isNull(Invoices.organisationId)
+        )
+      )
+      .limit(1);
+  }
 
   if (!result) {
     return notFound();
   }
 
-  return (
-    <div className=" mx-auto p-6">
-      <Container>
-        <div className="flex flex-col gap-6 bg-background p-8 rounded-lg shadow-sm">
-          <div className="flex gap-6 items-center border-b pb-4">
-            <h1 className="text-3xl font-bold tracking-tight">
-              Invoice #{invoiceId}
-            </h1>
-            <Badge
-              className={cn(
-                "rounded-full text-sm font-medium capitalize",
-                result.status === "open" && "bg-blue-500 text-white",
-                result.status === "paid" && "bg-green-600 text-white",
-                result.status === "void" && "bg-zinc-700 text-white",
-                result.status === "uncollectible" && "bg-red-500 text-white"
-              )}
-            >
-              {result.status}
-            </Badge>
-          </div>
+  const invoice = {
+    ...result.invoices,
+    customer: result.customers,
+  };
 
-          <div>
-            <h2 className="text-xl font-semibold">Description</h2>
-            <p className="text-muted-foreground mt-2">{result.description}</p>
-          </div>
-
-          <div>
-            <h2 className="text-lg font-semibold mb-2">Billing Details</h2>
-            <ul className="space-y-2">
-              <li className="flex gap-6">
-                <span className="text-muted-foreground">Invoice ID:</span>
-                <span className="font-medium">{result.id}</span>
-              </li>
-              <li className="flex gap-6">
-                <span className="text-muted-foreground">Amount:</span>
-                <span className="font-medium">₹{result.value / 100}</span>
-              </li>
-              <li className="flex gap-6">
-                <span className="text-muted-foreground">Date:</span>
-                <span className="font-medium">
-                  {new Date(result.createTs).toLocaleDateString()}
-                </span>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </Container>
-    </div>
-  );
+  return <Invoice invoice={invoice} />;
 }
