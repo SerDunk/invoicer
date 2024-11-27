@@ -7,7 +7,7 @@ import { db } from "@/db";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Check, CreditCard } from "lucide-react";
-import { createPayment, updateInvoice, updateStatus } from "@/app/actions";
+import { createPayment, updateStatus } from "@/app/actions";
 import Stripe from "stripe";
 
 interface InvoiceProps {
@@ -21,7 +21,7 @@ export default async function Invoice({ params, searchParams }: InvoiceProps) {
   const sessionId = (await searchParams).session_id;
   const isSuccess = sessionId && (await searchParams).status === "success";
   const isCanceled = (await searchParams).status === "canceled";
-  const isError = isSuccess && !sessionId;
+  let isError = isSuccess && !sessionId;
 
   const invoiceId = parseInt(invoiceIdStr);
   if (isNaN(invoiceId)) {
