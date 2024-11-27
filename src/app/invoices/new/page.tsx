@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { addInvoice } from "@/app/actions";
 import { SyntheticEvent, useState } from "react";
-import Form from "next/Form";
+import Form from "next/form";
 import Container from "@/components/Container";
 
 export default function NewInvoice() {
