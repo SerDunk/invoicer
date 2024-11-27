@@ -96,10 +96,10 @@ export default async function Dashboard() {
                       href={`/invoices/${invoice.id}`}
                       className="p-4 block"
                     >
-                      {invoice.customer.email}
+                      {invoice.customer.mail}
                     </Link>
                   </TableCell>
-                  <TableCell className="text-cent p-0er ">
+                  <TableCell className="text-center p-0er ">
                     <Badge
                       className={cn(
                         "rounded-full px-3 py-1 text-sm font-medium capitalize",
@@ -113,7 +113,7 @@ export default async function Dashboard() {
                       {invoice.status}{" "}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-righ p-0t">
+                  <TableCell className="text-right p-0t">
                     <Link
                       href={`/invoices/${invoice.id}`}
                       className="font-semibold p-4 block"

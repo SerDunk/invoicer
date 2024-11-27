@@ -26,7 +26,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { AVAILABLE_STATUS } from "@/data/invoice";
 import { updateInvoice, deleteInvoice } from "@/app/actions";
-import { ChevronDown, Ellipsis, Trash2 } from "lucide-react";
+import { ChevronDown, CreditCard, Ellipsis, Trash2 } from "lucide-react";
+import Link from "next/link";
 
 interface InvoiceProps {
   invoice: typeof Invoices.$inferSelect & {
@@ -108,6 +109,15 @@ export default function Invoice({ invoice }: InvoiceProps) {
                         </button>
                       </DropdownMenuItem>
                     </DialogTrigger>
+                    <DropdownMenuItem>
+                      <Link
+                        className="flex gap-2"
+                        href={`/invoices/${invoice.id}/payment`}
+                      >
+                        <CreditCard className="w-4 h-auto" />
+                        Payments
+                      </Link>
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
 
@@ -166,7 +176,7 @@ export default function Invoice({ invoice }: InvoiceProps) {
               </li>
               <li className="flex gap-6">
                 <span className="text-muted-foreground">Billing Email:</span>
-                <span className="font-medium">{invoice.customer.email}</span>
+                <span className="font-medium">{invoice.customer.mail}</span>
               </li>
             </ul>
           </div>
